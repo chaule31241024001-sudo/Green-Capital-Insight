@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-export const C = { navy: '#171717', blue: '#404040', teal: '#737373', green: '#525252', purple: '#a8a29e', grid: '#e7e5e4', axis: '#78716c' }
+export const C = { navy: '#16382f', blue: '#2f6f5e', teal: '#2f9b73', green: '#2f8f5b', purple: '#7b6a9d', grid: '#dce5da', axis: '#667a70' }
 export const axis = { stroke: C.axis, fontSize: 11, tickLine: false, axisLine: false } as const
 export function ChartTip({ active, payload, label, f }: { active?: boolean; payload?: any[]; label?: ReactNode; f?: (v: number, k: string) => string }) {
   if (!active || !payload?.length) return null

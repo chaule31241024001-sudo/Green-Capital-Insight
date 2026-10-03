@@ -23,20 +23,20 @@ export function Card({ children, className, title, action, eyebrow }: { children
 type BtnV = 'primary' | 'secondary' | 'ghost' | 'navy'
 export function Button({ v = 'secondary', className, children, ...p }: React.ButtonHTMLAttributes<HTMLButtonElement> & { v?: BtnV }) {
   const s: Record<BtnV, string> = {
-    primary: 'bg-ink text-white hover:bg-[#303030] border-ink',
+    primary: 'bg-ink text-white hover:bg-[#245344] border-ink',
     navy: 'bg-navy text-white hover:bg-navy-2 border-navy',
-    secondary: 'bg-white text-ink border-line hover:border-[#c9d2dc] hover:bg-[#fbfcfd]',
-    ghost: 'border-transparent text-mute hover:text-ink hover:bg-[#eef2f6]',
+    secondary: 'bg-white text-ink border-line hover:border-[#9eb5a6] hover:bg-[#f8fbf6]',
+    ghost: 'border-transparent text-mute hover:text-ink hover:bg-[#eaf2e9]',
   }
   return <button {...p} className={cx('inline-flex h-10 items-center justify-center gap-2 border px-4 text-[13.5px] font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-ink/20 focus-visible:outline-none disabled:opacity-50', s[v], className)}>{children}</button>
 }
 
 type Tone = 'neutral' | 'blue' | 'teal' | 'green' | 'purple' | 'amber' | 'red' | 'navy'
 const TONES: Record<Tone, string> = {
-  neutral: 'bg-[#f5f5f4] text-[#525252] border-[#d6d3d1]', blue: 'bg-[#f5f5f4] text-[#262626] border-[#d6d3d1]',
-  teal: 'bg-[#f5f5f4] text-[#404040] border-[#d6d3d1]', green: 'bg-[#f5f5f4] text-[#404040] border-[#d6d3d1]',
-  purple: 'bg-[#f5f5f4] text-[#525252] border-[#d6d3d1]', amber: 'bg-[#fafaf9] text-[#404040] border-[#d6d3d1]',
-  red: 'bg-[#fafaf9] text-[#262626] border-[#a8a29e]', navy: 'bg-navy text-white border-navy',
+  neutral: 'bg-[#f3f5ed] text-[#52675d] border-[#d5dfd4]', blue: 'bg-[#edf5f0] text-[#245344] border-[#b7d2c2]',
+  teal: 'bg-[#e9f7f0] text-[#237456] border-[#a9d8c3]', green: 'bg-[#eaf6ee] text-[#237044] border-[#acd3ba]',
+  purple: 'bg-[#f3eff8] text-[#675783] border-[#d5cae3]', amber: 'bg-[#fff7df] text-[#8a5b00] border-[#efd38a]',
+  red: 'bg-[#fff0ef] text-[#a53636] border-[#e6aaa6]', navy: 'bg-navy text-white border-navy',
 }
 export function Badge({ tone = 'neutral', children, icon }: { tone?: Tone; children: ReactNode; icon?: ReactNode }) {
   return <span className={cx('inline-flex items-center gap-1 border px-2 py-0.5 text-[11.5px] font-medium whitespace-nowrap', TONES[tone])}>{icon}{children}</span>
@@ -54,10 +54,10 @@ export function Tip({ text, children }: { text: string; children?: ReactNode }) 
 
 export function Banner({ tone = 'info', title, children, action }: { tone?: 'info' | 'warn' | 'error' | 'success'; title?: ReactNode; children?: ReactNode; action?: ReactNode }) {
   const m = {
-    info: ['border-[#d6d3d1] bg-[#fafaf9]', <Info size={16} className="text-[#525252]" />],
-    warn: ['border-[#a8a29e] bg-[#fafaf9]', <AlertTriangle size={16} className="text-[#404040]" />],
-    error: ['border-[#78716c] bg-[#fafaf9]', <XCircle size={16} className="text-[#262626]" />],
-    success: ['border-[#d6d3d1] bg-[#f5f5f4]', <CheckCircle2 size={16} className="text-[#404040]" />],
+    info: ['border-[#bfd5c7] bg-[#f4faf5]', <Info size={16} className="text-[#2f6f5e]" />],
+    warn: ['border-[#e8c76f] bg-[#fff8e5]', <AlertTriangle size={16} className="text-[#a66d00]" />],
+    error: ['border-[#e1a19d] bg-[#fff1f0]', <XCircle size={16} className="text-[#b53b3b]" />],
+    success: ['border-[#acd3ba] bg-[#edf8f0]', <CheckCircle2 size={16} className="text-[#2f8f5b]" />],
   } as const
   return (
     <div className={cx('flex items-start gap-3 border px-4 py-3 text-[13px]', m[tone][0])}>

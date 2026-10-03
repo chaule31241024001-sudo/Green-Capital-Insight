@@ -5,24 +5,27 @@
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-serif: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --color-navy: #111111;
-  --color-navy-2: #262626;
-  --color-blue: #171717;
-  --color-teal: #525252;
-  --color-green: #404040;
-  --color-purple: #737373;
-  --color-canvas: #f5f5f4;
-  --color-line: #d6d3d1;
-  --color-ink: #171717;
-  --color-mute: #6b6b6b;
+  --color-navy: #16382f;
+  --color-navy-2: #245344;
+  --color-blue: #2f6f5e;
+  --color-teal: #2f9b73;
+  --color-green: #2f8f5b;
+  --color-purple: #7b6a9d;
+  --color-canvas: #f3f5ed;
+  --color-line: #d5dfd4;
+  --color-ink: #17352c;
+  --color-mute: #63766c;
+  --color-ok: #2f8f5b;
+  --color-warning: #e3a008;
+  --color-danger: #d64545;
 }
 
 @layer base {
   body { background: var(--color-canvas); color: var(--color-ink); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
-  ::selection { background: #d6d3d1; }
+  ::selection { background: #c9e7d5; }
   .tnum { font-variant-numeric: tabular-nums; }
   input[type=range] { accent-color: var(--color-blue); }
   .scroll-thin { scrollbar-width: thin; scrollbar-color: transparent transparent; }
-  .scroll-thin:hover { scrollbar-color: #a8a29e transparent; }
+  .scroll-thin:hover { scrollbar-color: #8ca99a transparent; }
 }
 

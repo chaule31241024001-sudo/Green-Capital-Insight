@@ -7,6 +7,7 @@ import { Badge, Button, Card, Drawer, Empty, Fixed, Modal, PageHead, Table, Tabs
 import { C, ChartTip, axis } from '../components/charts'
 import { exportScenarioCsv } from '../export'
 import { tr } from '../i18n'
+import { RISK_COLORS, soaRiskStatus } from '../riskStatus'
 
 const n4 = (v: number) => (v < 0 ? '−' : '') + fmt(Math.abs(v), 4)
 
@@ -50,7 +51,12 @@ export default function Scenario() {
   const key = { SOA: 'soa', 'Expected LevAdj': 'levAdj', 'Expected Debt Adjustment': 'debtAdj' }[metric] as 'soa' | 'levAdj' | 'debtAdj'
   const k = key === 'debtAdj' ? 1 : 100
   const fm = (v: number) => (key === 'debtAdj' ? `${sgn(v)} bn` : key === 'soa' ? pct(v) : pp(v, 2))
-  const chart = [{ n: 'Baseline', v: r[key] * k }, { n: 'Current Scenario', v: s[key] * k }, { n: 'CTR-only', v: calc.ctrOnly[key] * k }, { n: 'RRF-only', v: calc.rrfOnly[key] * k }]
+  const chart = [
+    { n: 'Baseline', v: r[key] * k, status: soaRiskStatus(r.soa) },
+    { n: 'Current Scenario', v: s[key] * k, status: soaRiskStatus(s.soa) },
+    { n: 'CTR-only', v: calc.ctrOnly[key] * k, status: soaRiskStatus(calc.ctrOnly.soa) },
+    { n: 'RRF-only', v: calc.rrfOnly[key] * k, status: soaRiskStatus(calc.rrfOnly.soa) },
+  ]
 
   const kpis: [string, number, number, (v: number) => string, (d: number) => string][] = [
     ['Scenario SOA', s.soa, r.soa, pct, (d) => pp(d)],
@@ -115,9 +121,18 @@ export default function Scenario() {
                 <XAxis dataKey="n" {...axis} /><YAxis {...axis} unit={key === 'debtAdj' ? '' : key === 'soa' ? '%' : ' pp'} />
                 <ReferenceLine y={0} stroke="#cbd5e1" />
                 <Tooltip cursor={{ fill: '#f5f7fa' }} content={<ChartTip f={(v) => fm(v / k)} />} />
-                <Bar dataKey="v" name={metric} radius={[4, 4, 0, 0]} isAnimationActive={false}>{chart.map((c, i) => <Cell key={c.n} fill={[C.navy, C.blue, '#7fcfc3', '#b9a3f5'][i]} />)}</Bar>
+                <Bar dataKey="v" name={metric} radius={[4, 4, 0, 0]} isAnimationActive={false}>{chart.map((c) => <Cell key={c.n} fill={RISK_COLORS[c.status]} />)}</Bar>
               </BarChart>
             </ResponsiveContainer>
+          </div>
+          <div className="border-t border-line px-5 py-3 text-[11.5px] text-mute">
+            <div className="flex flex-wrap gap-x-5 gap-y-2">
+              <span className="font-medium text-ink">{language === 'vi' ? 'Trạng thái theo SOA:' : 'Status by SOA:'}</span>
+              <RiskLegend color={RISK_COLORS.ok} label={language === 'vi' ? 'Ổn định · 40–80%' : 'OK · 40–80%'} />
+              <RiskLegend color={RISK_COLORS.near} label={language === 'vi' ? 'Gần cảnh báo · 25–40% hoặc 80–100%' : 'Near warning · 25–40% or 80–100%'} />
+              <RiskLegend color={RISK_COLORS.warning} label={language === 'vi' ? 'Cảnh báo · dưới 25% hoặc trên 100%' : 'Warning · below 25% or above 100%'} />
+            </div>
+            <p className="mt-2">{language === 'vi' ? 'Màu luôn được đánh giá theo SOA của từng kịch bản, kể cả khi đang xem chỉ số điều chỉnh đòn bẩy hoặc nợ.' : 'Color is always evaluated from each scenario’s SOA, including the leverage- and debt-adjustment views.'}</p>
           </div>
         </Card>
         <Card title="Scenario Table">
@@ -129,6 +144,10 @@ export default function Scenario() {
       <Drawer open={cmp} onClose={() => setCmp(false)} title="Saved Scenario Comparison"><Compare saved={saved} /></Drawer>
     </div>
   )
+}
+
+function RiskLegend({ color, label }: { color: string; label: string }) {
+  return <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: color }} />{label}</span>
 }
 
 function SaveModal({ open, onClose, onSave }: { open: boolean; onClose: () => void; onSave: (n: string, d: string) => void }) {

@@ -8,6 +8,7 @@ import { downloadJson } from '../export'
 import { Accordion, Badge, Button, Card, Empty, Modal, PageHead, Stat, Table, Tabs, Tip } from '../components/ui'
 import { C, ChartTip, axis } from '../components/charts'
 import { tr } from '../i18n'
+import { emissionContributionStatus, RISK_COLORS } from '../riskStatus'
 
 const TABS = ['Carbon & CTR', 'Target Leverage', 'Adjustment Speed', 'Model Coefficients', 'Diagnostics'] as const
 const n4 = (v: number) => (v < 0 ? '−' : '') + fmt(Math.abs(v), 4)
@@ -35,7 +36,10 @@ export default function Analysis() {
   const [formula, setFormula] = useState(false)
   useEffect(() => { if (sub && TABS.includes(sub as (typeof TABS)[number])) setTab(sub as (typeof TABS)[number]) }, [sub])
   if (!r) return <Card><Empty icon={<Gauge size={24} />} title={t('No analysis selected')} text={t('Choose a company and analysis year to begin.')} action={<Button v="primary" onClick={() => go('data')}>{t('Start Analysis')}</Button>} /></Card>
-  const fuelData = r.fuelRows.map((f) => ({ n: f.name.split(' —')[0], v: f.co2, s: f.co2 / r.co2 })).sort((a, b) => b.v - a.v)
+  const fuelData = r.fuelRows.map((f) => {
+    const share = r.co2 > 0 ? f.co2 / r.co2 : 0
+    return { n: f.name.split(' —')[0], v: f.co2, s: share, status: emissionContributionStatus(share) }
+  }).sort((a, b) => b.v - a.v)
   const kt = r.fuelRows.reduce((s, f) => s + f.kt, 0)
 
   return (
@@ -61,11 +65,17 @@ export default function Analysis() {
                     <YAxis type="category" dataKey="n" {...axis} width={86} />
                     <Tooltip cursor={{ fill: '#f5f7fa' }} content={<ChartTip f={(v) => `${fmt(v, 0)} t`} />} />
                     <Bar dataKey="v" name="CO₂" barSize={16} radius={[0, 3, 3, 0]}>
-                      {fuelData.map((d, i) => <Cell key={d.n} fill={i === 0 ? C.navy : i < 3 ? C.teal : '#9fb3c8'} />)}
+                      {fuelData.map((d) => <Cell key={d.n} fill={RISK_COLORS[d.status]} />)}
                       <LabelList dataKey="s" position="right" formatter={(v: any) => pct(v)} style={{ fontSize: 11, fill: C.axis }} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
+              </div>
+              <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-line px-5 py-3 text-[11.5px] text-mute">
+                <span className="font-medium text-ink">{language === 'vi' ? 'Tỷ trọng trong tổng CO₂:' : 'Share of total CO₂:'}</span>
+                <RiskLegend color={RISK_COLORS.ok} label={language === 'vi' ? 'Ổn định · dưới 20%' : 'OK · below 20%'} />
+                <RiskLegend color={RISK_COLORS.near} label={language === 'vi' ? 'Gần cảnh báo · 20–40%' : 'Near warning · 20–40%'} />
+                <RiskLegend color={RISK_COLORS.warning} label={language === 'vi' ? 'Cảnh báo · trên 40%' : 'Warning · above 40%'} />
               </div>
             </Card>
             <Card title="Fuel Detail" action={<Tip text="CTR = Total CO₂ / Revenue" />}>
@@ -143,6 +153,10 @@ export default function Analysis() {
       <FormulaModal open={formula} onClose={() => setFormula(false)} />
     </div>
   )
+}
+
+function RiskLegend({ color, label }: { color: string; label: string }) {
+  return <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: color }} />{label}</span>
 }
 
 export function Diagnostics() {
