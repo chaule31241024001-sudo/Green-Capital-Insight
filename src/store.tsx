@@ -1,5 +1,7 @@
 import { createContext, useContext } from 'react'
 import type { Inputs, Result } from './model'
+import type { ExtractedCompanyData } from './companyDataExtractor'
+import type { Language } from './i18n'
 
 export type Page = 'overview' | 'data' | 'analysis' | 'scenario'
 export type Saved = { name: string; desc: string; ctr: number; rrf: number }
@@ -13,7 +15,9 @@ export type Ctx = {
   selectCompany: (id: string, year?: number) => void
   openCompanySetup: () => void
   signOut: () => void
+  language: Language; setLanguage: (language: Language) => void
   inputs: Inputs; setInputs: (i: Inputs) => void
+  importCompanyData: (data: ExtractedCompanyData) => void
   result: Result | null; run: () => Promise<void>; running: boolean
   ctrPct: number; setCtrPct: (n: number) => void; rrfS: number; setRrfS: (n: number) => void
   saved: Saved[]; setSaved: (s: Saved[]) => void

@@ -5,6 +5,7 @@ import { useApp } from '../store'
 import { buildTrend, fmt, pct, pp, scenario, sgn } from '../model'
 import { Badge, Banner, Button, Card, Delta, Empty, PageHead, Table, Tabs, Tip, cx } from '../components/ui'
 import { C, ChartTip, axis } from '../components/charts'
+import { tr } from '../i18n'
 
 export function useScenarios() {
   const { result: r } = useApp()
@@ -12,11 +13,12 @@ export function useScenarios() {
 }
 
 export default function Overview() {
-  const { result: r, go, inputs } = useApp()
+  const { result: r, go, inputs, language } = useApp()
+  const t = (text: string) => tr(language, text)
   const s = useScenarios()
   const [hidden, setHidden] = useState<string[]>([])
   const [metric, setMetric] = useState<'SOA' | 'Expected LevAdj' | 'Debt Adjustment'>('SOA')
-  if (!r || !s) return <Card><Empty icon={<Gauge size={24} />} title="No analysis selected" text="Choose a company and analysis year to begin." action={<Button v="primary" onClick={() => go('data')}><Plus size={15} />Start Analysis</Button>} /></Card>
+  if (!r || !s) return <Card><Empty icon={<Gauge size={24} />} title={t('No analysis selected')} text={t('Choose a company and analysis year to begin.')} action={<Button v="primary" onClick={() => go('data')}><Plus size={15} />{t('Start Analysis')}</Button>} /></Card>
   const trend = buildTrend(r)
   const ctrChange = ((trend.at(-1)!.ctr / trend.at(-2)!.ctr) - 1) * 100
 
@@ -34,21 +36,21 @@ export default function Overview() {
 
   return (
     <div className="space-y-6">
-      <PageHead n="Dashboard" title="Capital Structure Overview" sub="Internal climate-risk and capital-structure workspace for the selected company and analysis year." actions={<><Button onClick={() => go('data')}>Input Analysis Data</Button><Button v="primary" onClick={() => go('scenario')}><SlidersHorizontal size={15} />Scenario Simulation</Button></>} />
+      <PageHead n={t('Dashboard')} title={t('Capital Structure Overview')} sub={t('Internal climate-risk and capital-structure workspace for the selected company and analysis year.')} actions={<><Button onClick={() => go('data')}>{t('Input Analysis Data')}</Button><Button v="primary" onClick={() => go('scenario')}><SlidersHorizontal size={15} />{t('Scenario Simulation')}</Button></>} />
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border border-line bg-[#f5f5f4] px-4 py-3 text-[13px]">
-        <span className="flex items-center gap-2 font-semibold text-navy"><CalendarClock size={15} className="text-teal" />Analysis year: {inputs.year}</span>
-        <span className="text-[#334155]">Calculations use <b className="font-mono font-medium">FY{inputs.year - 1}</b> financial, fuel, industry and macroeconomic data.</span>
-        <span className="ml-auto text-[11.5px] text-mute italic">Figures shown are illustrative model outputs for {inputs.company}.</span>
+        <span className="flex items-center gap-2 font-semibold text-navy"><CalendarClock size={15} className="text-teal" />{t('Analysis year')}: {inputs.year}</span>
+        <span className="text-[#334155]">{language === 'vi' ? <>Tính toán sử dụng dữ liệu tài chính, nhiên liệu, ngành và vĩ mô của <b className="font-mono font-medium">FY{inputs.year - 1}</b>.</> : <>Calculations use <b className="font-mono font-medium">FY{inputs.year - 1}</b> financial, fuel, industry and macroeconomic data.</>}</span>
+        <span className="ml-auto text-[11.5px] text-mute italic">{language === 'vi' ? `Kết quả mô hình minh họa cho ${inputs.company}.` : `Figures shown are illustrative model outputs for ${inputs.company}.`}</span>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
         <Card className="flex flex-col p-6">
-          <div className="flex items-center justify-between"><h3 className="flex items-center gap-2 text-[15px] font-semibold"><Factory size={16} className="text-teal" />Carbon Risk</h3><Badge tone="neutral">Model proxy</Badge></div>
+          <div className="flex items-center justify-between"><h3 className="flex items-center gap-2 text-[15px] font-semibold"><Factory size={16} className="text-teal" />{t('Carbon Risk')}</h3><Badge tone="neutral">{t('Model proxy')}</Badge></div>
           <div className="mt-5 text-[12.5px] text-mute">Total CO₂</div>
           <div className="tnum text-[30px] leading-tight font-semibold tracking-tight">{fmt(r.co2, 0)} <span className="text-[15px] font-medium text-mute">tCO₂</span></div>
           <div className="mt-4 flex items-end justify-between gap-4 border-t border-line pt-4">
             <div>
-              <div className="flex items-center gap-1.5 text-[12.5px] text-mute">Carbon Intensity — CTR<Tip text="CTR = Total CO₂ / Revenue" /></div>
+              <div className="flex items-center gap-1.5 text-[12.5px] text-mute">{t('Carbon Intensity')} — CTR<Tip text="CTR = Total CO₂ / Revenue" /></div>
               <div className="tnum mt-1 text-[20px] font-semibold">{fmt(r.ctr, 2)} <span className="text-[12px] font-normal text-mute">tCO₂ / VND bn revenue</span></div>
               <div className="mt-1 text-[12px] text-teal">{ctrChange < 0 ? '▼' : '▲'} {fmt(Math.abs(ctrChange))}% vs FY{inputs.year - 2}</div>
             </div>
@@ -59,23 +61,23 @@ export default function Overview() {
         </Card>
 
         <Card className="flex flex-col p-6">
-          <div className="flex items-center justify-between"><h3 className="flex items-center gap-2 text-[15px] font-semibold"><Scale size={16} className="text-blue" />Target Leverage</h3><Badge tone={below ? 'blue' : 'purple'}>{below ? 'Below target leverage' : 'Above target leverage'}</Badge></div>
+          <div className="flex items-center justify-between"><h3 className="flex items-center gap-2 text-[15px] font-semibold"><Scale size={16} className="text-blue" />{t('Target Leverage')}</h3><Badge tone={below ? 'blue' : 'purple'}>{language === 'vi' ? (below ? 'Thấp hơn mục tiêu' : 'Cao hơn mục tiêu') : (below ? 'Below target leverage' : 'Above target leverage')}</Badge></div>
           <div className="mt-5 grid grid-cols-3 gap-3">
-            <div><div className="text-[12px] text-mute">Actual LEV (t−1)</div><div className="tnum text-[26px] font-semibold">{pct(r.lev)}</div></div>
-            <div><div className="text-[12px] text-mute">Target LEV</div><div className="tnum text-[26px] font-semibold text-blue">{pct(r.tlev)}</div></div>
-            <div><div className="text-[12px] text-mute">Deviation</div><div className="tnum text-[26px] font-semibold">{pp(r.devlev)}</div></div>
+            <div><div className="text-[12px] text-mute">{t('Actual LEV')} (t−1)</div><div className="tnum text-[26px] font-semibold">{pct(r.lev)}</div></div>
+            <div><div className="text-[12px] text-mute">{t('Target LEV')}</div><div className="tnum text-[26px] font-semibold text-blue">{pct(r.tlev)}</div></div>
+            <div><div className="text-[12px] text-mute">{t('Deviation')}</div><div className="tnum text-[26px] font-semibold">{pp(r.devlev)}</div></div>
           </div>
           <div className="mt-4 space-y-2">
             {[['Actual', r.lev, C.navy], ['Target', r.tlev, C.blue]].map(([l, v, c]: any) => (
-              <div key={l} className="flex items-center gap-3 text-[11.5px]"><span className="w-12 text-mute">{l}</span><div className="relative h-2.5 flex-1 rounded-full bg-[#eef2f6]"><div className="h-full rounded-full" style={{ width: `${Math.min(v, 1) * 100 / 0.7}%`, background: c }} /></div><span className="tnum w-12 text-right font-mono">{pct(v)}</span></div>
+              <div key={l} className="flex items-center gap-3 text-[11.5px]"><span className="w-12 text-mute">{t(l)}</span><div className="relative h-2.5 flex-1 rounded-full bg-[#eef2f6]"><div className="h-full rounded-full" style={{ width: `${Math.min(v, 1) * 100 / 0.7}%`, background: c }} /></div><span className="tnum w-12 text-right font-mono">{pct(v)}</span></div>
             ))}
             <div className="flex justify-between pl-15 font-mono text-[10px] text-[#a0aec0]"><span>0%</span><span>35%</span><span>70%</span></div>
           </div>
-          <div className="mt-auto flex items-center justify-between border-t border-line pt-3 text-[12.5px]"><span className="text-mute">Target Debt</span><span className="tnum font-mono font-medium">{fmt(r.targetDebt, 0)} VND bn</span></div>
+          <div className="mt-auto flex items-center justify-between border-t border-line pt-3 text-[12.5px]"><span className="text-mute">{t('Target Debt')}</span><span className="tnum font-mono font-medium">{fmt(r.targetDebt, 0)} VND bn</span></div>
         </Card>
 
         <Card className="flex flex-col p-6 lg:col-span-2 xl:col-span-1">
-          <div className="flex items-center justify-between"><h3 className="flex items-center gap-2 text-[15px] font-semibold"><Gauge size={16} className="text-purple" />Speed of Adjustment</h3><Tip text="SOA is an unbounded model estimate; it is not clipped to 0–100%." /></div>
+          <div className="flex items-center justify-between"><h3 className="flex items-center gap-2 text-[15px] font-semibold"><Gauge size={16} className="text-purple" />{t('Speed of Adjustment')}</h3><Tip text="SOA is an unbounded model estimate; it is not clipped to 0–100%." /></div>
           <div className="mt-5 flex items-end gap-4">
             <div><div className="text-[12.5px] text-mute">SOA</div><div className="tnum text-[30px] leading-tight font-semibold">{pct(r.soa)}</div></div>
             <div className="mb-2 flex-1">
@@ -87,15 +89,15 @@ export default function Overview() {
             </div>
           </div>
           <div className="mt-4 grid grid-cols-3 gap-3 border-t border-line pt-4 text-[12px]">
-            <div><div className="text-mute">Marginal Effect of CTR</div><div className="tnum mt-1 font-mono text-[15px] font-medium">{r.me < 0 ? '−' : ''}{fmt(Math.abs(r.me), 4)}</div></div>
-            <div><div className="text-mute">Expected Lev. Adj.</div><div className="tnum mt-1 font-mono text-[15px] font-medium">{pp(r.levAdj, 2)}</div></div>
-            <div><div className="text-mute">Expected Debt Adj.</div><div className="tnum mt-1 font-mono text-[15px] font-medium">{sgn(r.debtAdj)} <span className="text-[11px] text-mute">bn</span></div></div>
+            <div><div className="text-mute">{t('Marginal Effect of CTR')}</div><div className="tnum mt-1 font-mono text-[15px] font-medium">{r.me < 0 ? '−' : ''}{fmt(Math.abs(r.me), 4)}</div></div>
+            <div><div className="text-mute">{t('Expected Leverage Adjustment')}</div><div className="tnum mt-1 font-mono text-[15px] font-medium">{pp(r.levAdj, 2)}</div></div>
+            <div><div className="text-mute">{t('Expected Debt Adjustment')}</div><div className="tnum mt-1 font-mono text-[15px] font-medium">{sgn(r.debtAdj)} <span className="text-[11px] text-mute">bn</span></div></div>
           </div>
         </Card>
       </div>
 
       <div className="grid gap-5 xl:grid-cols-2">
-        <Card title="CTR & Internal Reserve Trend" eyebrow={`FY${trend[0].y} – FY${trend.at(-1)!.y}`} action={<button onClick={() => go('analysis')} className="text-[12.5px] font-medium text-blue hover:underline">View details →</button>}>
+        <Card title={t('CTR & Internal Reserve Trend')} eyebrow={`FY${trend[0].y} – FY${trend.at(-1)!.y}`} action={<button onClick={() => go('analysis')} className="text-[12.5px] font-medium text-blue hover:underline">{language === 'vi' ? 'Xem chi tiết' : 'View details'} →</button>}>
           <div className="h-[280px] px-3 pt-4 pb-2">
             <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 320, height: 200 }}>
               <LineChart data={trend} margin={{ left: 0, right: 8, top: 5 }}>
@@ -111,7 +113,7 @@ export default function Overview() {
             </ResponsiveContainer>
           </div>
         </Card>
-        <Card title="SOA Under Alternative Scenarios" eyebrow="Baseline vs single-factor scenarios" action={<Tabs size="sm" tabs={['SOA', 'Expected LevAdj', 'Debt Adjustment'] as const} value={metric} onChange={setMetric} />}>
+        <Card title={t('SOA Under Alternative Scenarios')} eyebrow={language === 'vi' ? 'Cơ sở và các kịch bản đơn yếu tố' : 'Baseline vs single-factor scenarios'} action={<Tabs size="sm" tabs={['SOA', 'Expected LevAdj', 'Debt Adjustment'] as const} value={metric} onChange={setMetric} />}>
           <div className="h-[280px] px-3 pt-4 pb-2">
             <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 320, height: 200 }}>
               <BarChart data={bars} margin={{ left: 0, right: 8, top: 5 }} barSize={56}>
@@ -127,7 +129,7 @@ export default function Overview() {
         </Card>
       </div>
 
-      <Card title="Scenario Comparison" eyebrow="CTR −20% · RRF 15% of Total Assets" action={<Button className="h-8 text-[12.5px]" onClick={() => go('scenario')}>Open simulator</Button>}>
+      <Card title={t('Scenario Comparison')} eyebrow="CTR −20% · RRF 15% of Total Assets" action={<Button className="h-8 text-[12.5px]" onClick={() => go('scenario')}>{language === 'vi' ? 'Mở mô phỏng' : 'Open simulator'}</Button>}>
         <Table head={['Metric', 'Baseline', 'CTR Scenario', 'RRF Scenario', 'Change vs Baseline']} align={['l', 'r', 'r', 'r', 'r']} rows={rows.map(([l, g, f, t]) => {
           const b = g(s.base), c = g(s.ctrS), d = g(s.rrfS)
           const df = (x: number) => (t === 'amount' ? sgn(x - b) : l === 'SOA' ? pp(x - b) : l.startsWith('Marginal') ? sgn(x - b, 4) : pp(x - b, 2))

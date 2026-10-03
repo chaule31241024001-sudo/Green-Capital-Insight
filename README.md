@@ -10,12 +10,13 @@
 - Tìm kiếm công ty theo tên/mã hoặc thêm công ty mới.
 - Chọn ngành và năm phân tích bằng thanh trượt 1900–2030.
 - Chuyển đổi công ty, năm và theo dõi kết quả trên Dashboard.
+- Chuyển đổi giao diện Tiếng Việt/English trong **User Settings**.
 
 Năm được chọn là năm phân tích `t`; dữ liệu đầu vào thuộc kỳ trước `t−1`. Ví dụ, chọn năm 2024 thì nhập số liệu FY2023. Dữ liệu vĩ mô và trung vị ngành hiện tại hỗ trợ đầy đủ cho năm phân tích 2017–2024.
 
 ### Capital Analysis
 
-Người dùng nhập ba nhóm dữ liệu:
+Người dùng có thể nhập thủ công hoặc bấm **Extract data** để đọc file JSON/CSV có tên cột tiếng Việt hoặc tiếng Anh. Hệ thống tự nhận diện ba nhóm dữ liệu:
 
 - **Tài chính:** tổng tài sản, tổng nợ, doanh thu, EBIT, khấu hao, PPE và vốn hóa thị trường.
 - **Nhiên liệu:** mức tiêu thụ than, xăng, dầu, LPG, khí tự nhiên… theo đơn vị KTOE.
@@ -69,13 +70,15 @@ Email phải chứa `@`, mật khẩu có ít nhất 6 ký tự. Bấm **Continu
 
 1. Tìm một công ty có sẵn hoặc bấm **Add company** để thêm tên, mã và ngành.
 2. Chọn năm **2024** để thử với dữ liệu FY2023, sau đó bấm **Open Dashboard**.
-3. Chọn **Input Analysis Data**. Nhập dữ liệu tài chính theo đơn vị tỷ đồng, nhiên liệu theo KTOE và ba khoản quỹ dự trữ. Nhập `0` cho loại nhiên liệu không sử dụng, không để trống.
+3. Chọn **Input Analysis Data**. Nhập thủ công hoặc bấm **Extract data** để tải JSON/CSV và áp dụng các trường đã nhận diện. Có thể tải CSV mẫu ngay trong cửa sổ này.
 4. Bấm **Run Analysis**. Nếu dữ liệu chưa hợp lệ, hệ thống sẽ đánh dấu ô cần sửa.
 5. Xem kết quả tại các tab **Carbon & CTR**, **Target Leverage**, **Adjustment Speed**, **Model Coefficients** và **Diagnostics**.
 6. Chọn **Scenario Simulation**, kéo hai thanh **Carbon Intensity Scenario** và **Internal Reserve Scenario** để quan sát thay đổi so với Baseline.
 7. Dùng **Save Scenario** để lưu, **Compare Scenario** để so sánh hoặc **Export** để tải CSV.
 
 Có thể đổi công ty ở thanh đầu trang, đổi năm tại nút **Year** và đăng xuất từ ảnh đại diện. Khi đổi công ty hoặc năm, kết quả cũ được xóa để tránh trộn dữ liệu.
+
+Để đổi ngôn ngữ, bấm ảnh đại diện → **Settings** → chọn **English** hoặc **Tiếng Việt**. Lựa chọn được ghi nhớ trên trình duyệt.
 
 ### Kiểm tra kỹ thuật
 

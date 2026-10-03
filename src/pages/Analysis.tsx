@@ -7,6 +7,7 @@ import { EXPECTED_LEV_ADJ_INTERCEPT, MODEL_DIAGNOSTICS, SCENARIO_CONFIG } from '
 import { downloadJson } from '../export'
 import { Accordion, Badge, Button, Card, Empty, Modal, PageHead, Stat, Table, Tabs, Tip } from '../components/ui'
 import { C, ChartTip, axis } from '../components/charts'
+import { tr } from '../i18n'
 
 const TABS = ['Carbon & CTR', 'Target Leverage', 'Adjustment Speed', 'Model Coefficients', 'Diagnostics'] as const
 const n4 = (v: number) => (v < 0 ? '−' : '') + fmt(Math.abs(v), 4)
@@ -28,18 +29,19 @@ export function FormulaModal({ open, onClose }: { open: boolean; onClose: () => 
 }
 
 export default function Analysis() {
-  const { result: r, go, sub, toast } = useApp()
+  const { result: r, go, sub, toast, language } = useApp()
+  const t = (text: string) => tr(language, text)
   const [tab, setTab] = useState<(typeof TABS)[number]>((sub as any) || 'Carbon & CTR')
   const [formula, setFormula] = useState(false)
   useEffect(() => { if (sub && TABS.includes(sub as (typeof TABS)[number])) setTab(sub as (typeof TABS)[number]) }, [sub])
-  if (!r) return <Card><Empty icon={<Gauge size={24} />} title="No analysis selected" text="Choose a company and analysis year to begin." action={<Button v="primary" onClick={() => go('data')}>Start Analysis</Button>} /></Card>
+  if (!r) return <Card><Empty icon={<Gauge size={24} />} title={t('No analysis selected')} text={t('Choose a company and analysis year to begin.')} action={<Button v="primary" onClick={() => go('data')}>{t('Start Analysis')}</Button>} /></Card>
   const fuelData = r.fuelRows.map((f) => ({ n: f.name.split(' —')[0], v: f.co2, s: f.co2 / r.co2 })).sort((a, b) => b.v - a.v)
   const kt = r.fuelRows.reduce((s, f) => s + f.kt, 0)
 
   return (
     <div className="space-y-6">
-      <PageHead n="01 · Core Function" title="Capital Analysis" sub="Inspect every intermediate calculation behind the target-leverage and adjustment-speed technology." actions={<Button onClick={() => go('data')}>Edit Input Data</Button>} />
-      <Tabs tabs={TABS} value={tab} onChange={setTab} />
+      <PageHead n="01 · Core Function" title={t('Capital Analysis')} sub={language === 'vi' ? 'Kiểm tra từng bước tính toán của mô hình đòn bẩy mục tiêu và tốc độ điều chỉnh.' : 'Inspect every intermediate calculation behind the target-leverage and adjustment-speed technology.'} actions={<Button onClick={() => go('data')}>{t('Edit Input Data')}</Button>} />
+      <Tabs tabs={TABS} value={tab} onChange={setTab} labels={Object.fromEntries(TABS.map((item) => [item, t(item)]))} />
 
       {tab === 'Carbon & CTR' && (
         <>

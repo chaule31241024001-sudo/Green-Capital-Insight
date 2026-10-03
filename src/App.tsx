@@ -4,6 +4,8 @@ import { DEFAULT_INPUTS, analyze, type Inputs, type Result } from './model'
 import Shell from './components/Shell'
 import { CompanySetup, LoginScreen } from './components/Access'
 import { CheckCircle2, Info, Loader2, XCircle } from 'lucide-react'
+import type { ExtractedCompanyData } from './companyDataExtractor'
+import { tr, type Language } from './i18n'
 
 const Overview = lazy(() => import('./pages/Overview'))
 const CompanyData = lazy(() => import('./pages/CompanyData'))
@@ -21,6 +23,7 @@ const DEFAULT_COMPANIES: CompanyProfile[] = [
 export default function App() {
   const [page, setPage] = useState<Page>('overview')
   const [sub, setSub] = useState<string>()
+  const [language, setLanguage] = useState<Language>(() => localStorage.getItem('gci:language') === 'vi' ? 'vi' : 'en')
   const [user, setUser] = useState<InternalUser | null>(() => {
     try { const stored = localStorage.getItem('gci:user'); return stored ? JSON.parse(stored) : null } catch { return null }
   })
@@ -86,6 +89,23 @@ export default function App() {
     setPage('overview')
     window.scrollTo({ top: 0 })
   }, [companies, inputs.year])
+  const importCompanyData = useCallback((data: ExtractedCompanyData) => {
+    const importedName = data.inputs.company?.trim()
+    if (importedName) {
+      const match = companies.find((company) => company.name.toLowerCase() === importedName.toLowerCase() || Boolean(data.companyCode && company.code.toLowerCase() === data.companyCode.toLowerCase()))
+      if (match) {
+        setActiveCompanyId(match.id)
+        setCompanies((current) => current.map((company) => company.id === match.id ? { ...company, industry: data.inputs.industry || company.industry, code: data.companyCode || company.code, country: data.country || company.country } : company))
+      } else {
+        const created: CompanyProfile = { id: crypto.randomUUID(), name: importedName, industry: data.inputs.industry || inputs.industry, code: data.companyCode || '', country: data.country || 'Vietnam' }
+        setCompanies((current) => [...current, created])
+        setActiveCompanyId(created.id)
+      }
+    }
+    setInputsState((current) => ({ ...current, ...data.inputs, fuel: { ...current.fuel, ...data.inputs.fuel } }))
+    setResult(null)
+    setCtrPct(0)
+  }, [companies, inputs.industry])
   const signOut = useCallback(() => {
     setUser(null)
     setSetupOpen(false)
@@ -107,6 +127,10 @@ export default function App() {
     }
   }
   useEffect(() => { document.title = 'Green Capital Insight' }, [])
+  useEffect(() => {
+    localStorage.setItem('gci:language', language)
+    document.documentElement.lang = language
+  }, [language])
   useEffect(() => { try { localStorage.setItem('gci:companies', JSON.stringify(companies)) } catch { /* storage is optional */ } }, [companies])
   useEffect(() => {
     try {
@@ -118,15 +142,15 @@ export default function App() {
     try { localStorage.setItem('gci:scenarios', JSON.stringify(saved)) } catch { /* storage is optional */ }
   }, [saved])
 
-  if (!user) return <LoginScreen onSignIn={(nextUser) => { setUser(nextUser); setSetupOpen(true) }} />
+  if (!user) return <LoginScreen language={language} onLanguageChange={setLanguage} onSignIn={(nextUser) => { setUser(nextUser); setSetupOpen(true) }} />
   if (setupOpen || !activeCompanyId || !companies.some((company) => company.id === activeCompanyId)) {
-    return <CompanySetup user={user} companies={companies} activeCompanyId={activeCompanyId} initialYear={inputs.year} onAddCompany={addCompany} onContinue={selectCompany} onClose={activeCompanyId ? () => setSetupOpen(false) : undefined} onSignOut={signOut} />
+    return <CompanySetup language={language} onLanguageChange={setLanguage} user={user} companies={companies} activeCompanyId={activeCompanyId} initialYear={inputs.year} onAddCompany={addCompany} onContinue={selectCompany} onClose={activeCompanyId ? () => setSetupOpen(false) : undefined} onSignOut={signOut} />
   }
 
   const P = { overview: Overview, data: CompanyData, analysis: Analysis, scenario: Scenario }[page]
   return (
-    <AppCtx.Provider value={{ page, go, sub, user, companies, activeCompanyId, selectCompany, openCompanySetup: () => setSetupOpen(true), signOut, inputs, setInputs, result, run, running, ctrPct, setCtrPct, rrfS, setRrfS, saved, setSaved, toast, updated }}>
-      <Shell><Suspense fallback={<div className="flex min-h-[45vh] items-center justify-center gap-2 text-[13px] text-mute"><Loader2 size={16} className="animate-spin" />Loading workspace…</div>}><P /></Suspense></Shell>
+    <AppCtx.Provider value={{ page, go, sub, user, companies, activeCompanyId, selectCompany, openCompanySetup: () => setSetupOpen(true), signOut, language, setLanguage, inputs, setInputs, importCompanyData, result, run, running, ctrPct, setCtrPct, rrfS, setRrfS, saved, setSaved, toast, updated }}>
+      <Shell><Suspense fallback={<div className="flex min-h-[45vh] items-center justify-center gap-2 text-[13px] text-mute"><Loader2 size={16} className="animate-spin" />{tr(language, 'Loading workspace…')}</div>}><P /></Suspense></Shell>
       <div className="fixed right-4 bottom-4 z-[90] flex flex-col gap-2">
         {toasts.map((t) => (
           <div key={t.id} className="flex items-center gap-2.5 border border-[#404040] bg-navy px-4 py-3 text-[13px] text-white shadow-xl">

@@ -68,18 +68,18 @@ export function Banner({ tone = 'info', title, children, action }: { tone?: 'inf
   )
 }
 
-export function Tabs<T extends string>({ tabs, value, onChange, size = 'md' }: { tabs: readonly T[]; value: T; onChange: (t: T) => void; size?: 'sm' | 'md' }) {
+export function Tabs<T extends string>({ tabs, value, onChange, size = 'md', labels }: { tabs: readonly T[]; value: T; onChange: (t: T) => void; size?: 'sm' | 'md'; labels?: Partial<Record<T, string>> }) {
   if (size === 'sm')
     return (
       <div className="inline-flex border border-line bg-[#f5f5f4] p-0.5">
-        {tabs.map((t) => <button key={t} onClick={() => onChange(t)} className={cx('h-7 px-2.5 text-[12px] font-medium transition', value === t ? 'bg-white text-ink shadow-sm' : 'text-mute hover:text-ink')}>{t}</button>)}
+        {tabs.map((t) => <button key={t} onClick={() => onChange(t)} className={cx('h-7 px-2.5 text-[12px] font-medium transition', value === t ? 'bg-white text-ink shadow-sm' : 'text-mute hover:text-ink')}>{labels?.[t] ?? t}</button>)}
       </div>
     )
   return (
     <div className="scroll-thin -mx-1 flex gap-1 overflow-x-auto border-b border-line px-1">
       {tabs.map((t, n) => (
         <button key={t} onClick={() => onChange(t)} className={cx('relative flex h-11 shrink-0 items-center gap-2 px-3 text-[13.5px] font-medium transition-colors', value === t ? 'text-ink' : 'text-mute hover:text-ink')}>
-          <span className="font-mono text-[10.5px] text-[#94a3b8]">{String(n + 1).padStart(2, '0')}</span>{t}
+          <span className="font-mono text-[10.5px] text-[#94a3b8]">{String(n + 1).padStart(2, '0')}</span>{labels?.[t] ?? t}
           {value === t && <span className="absolute inset-x-2 -bottom-px h-0.5 rounded bg-navy" />}
         </button>
       ))}

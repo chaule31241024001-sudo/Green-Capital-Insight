@@ -6,6 +6,7 @@ import { SCENARIO_CONFIG, fmt, pct, pp, scenario, scenarioCtrFromReduction, sgn 
 import { Badge, Button, Card, Drawer, Empty, Fixed, Modal, PageHead, Table, Tabs, Tip, cx } from '../components/ui'
 import { C, ChartTip, axis } from '../components/charts'
 import { exportScenarioCsv } from '../export'
+import { tr } from '../i18n'
 
 const n4 = (v: number) => (v < 0 ? '−' : '') + fmt(Math.abs(v), 4)
 
@@ -30,7 +31,8 @@ function ScenarioSlider({ title, sub, min, max, step, value, onChange, unit, chi
 }
 
 export default function Scenario() {
-  const { result: r, go, ctrPct, setCtrPct, rrfS, setRrfS, saved, setSaved, toast, inputs } = useApp()
+  const { result: r, go, ctrPct, setCtrPct, rrfS, setRrfS, saved, setSaved, toast, inputs, language } = useApp()
+  const t = (text: string) => tr(language, text)
   const [metric, setMetric] = useState<'SOA' | 'Expected LevAdj' | 'Expected Debt Adjustment'>('SOA')
   const [saveOpen, setSaveOpen] = useState(false)
   const [cmp, setCmp] = useState(false)
@@ -42,7 +44,7 @@ export default function Scenario() {
     const sCtr = scenarioCtrFromReduction(r.ctr, ctrPct), sRrf = rrfS / 100
     return { s: scenario(r, sCtr, sRrf), ctrOnly: scenario(r, sCtr, r.rrf), rrfOnly: scenario(r, r.ctr, sRrf), sCtr, sRrf }
   }, [r, ctrPct, rrfS])
-  if (!r || !calc) return <Card><Empty icon={<SlidersHorizontal size={24} />} title="No baseline available" text="Run a baseline analysis before creating scenarios." action={<Button v="primary" onClick={() => go('data')}>Run Baseline Analysis</Button>} /></Card>
+  if (!r || !calc) return <Card><Empty icon={<SlidersHorizontal size={24} />} title={t('No baseline available')} text={t('Run a baseline analysis before creating scenarios.')} action={<Button v="primary" onClick={() => go('data')}>{t('Run Baseline Analysis')}</Button>} /></Card>
   const { s } = calc
 
   const key = { SOA: 'soa', 'Expected LevAdj': 'levAdj', 'Expected Debt Adjustment': 'debtAdj' }[metric] as 'soa' | 'levAdj' | 'debtAdj'
@@ -65,27 +67,27 @@ export default function Scenario() {
 
   return (
     <div className="space-y-6">
-      <PageHead n="02 · Core Function" title="Scenario Simulation" sub="Explore how alternative climate-risk and internal-reserve assumptions affect the estimated capital adjustment path." actions={<>
-        <Button v="ghost" onClick={() => { setCtrPct(0); setRrfS(+(r.rrf * 100).toFixed(1)); toast('Scenario reset to baseline', 'info') }}><RotateCcw size={15} />Reset to Baseline</Button>
-        <Button onClick={() => setCmp(true)}><GitCompare size={15} />Compare Scenario</Button>
-        <Button onClick={() => { exportScenarioCsv(inputs, r, s, ctrPct, rrfS); toast('Scenario exported (CSV)') }}><Download size={15} />Export</Button>
-        <Button v="primary" onClick={() => setSaveOpen(true)}><Save size={15} />Save Scenario</Button></>} />
+      <PageHead n="02 · Core Function" title={t('Scenario Simulation')} sub={language === 'vi' ? 'Khám phá tác động của các giả định rủi ro khí hậu và quỹ dự trữ đến đường điều chỉnh vốn.' : 'Explore how alternative climate-risk and internal-reserve assumptions affect the estimated capital adjustment path.'} actions={<>
+        <Button v="ghost" onClick={() => { setCtrPct(0); setRrfS(+(r.rrf * 100).toFixed(1)); toast('Scenario reset to baseline', 'info') }}><RotateCcw size={15} />{t('Reset to Baseline')}</Button>
+        <Button onClick={() => setCmp(true)}><GitCompare size={15} />{t('Compare Scenario')}</Button>
+        <Button onClick={() => { exportScenarioCsv(inputs, r, s, ctrPct, rrfS); toast('Scenario exported (CSV)') }}><Download size={15} />{t('Export')}</Button>
+        <Button v="primary" onClick={() => setSaveOpen(true)}><Save size={15} />{t('Save Scenario')}</Button></>} />
 
       <Card className="overflow-hidden">
         <div className="grid grid-cols-2 divide-line sm:grid-cols-3 xl:grid-cols-6 xl:divide-x">
-          {[['Company', inputs.company], ['Analysis Year', `${inputs.year} · FY${inputs.year - 1} data`], ['Baseline CTR', fmt(r.ctr, 2)], ['Baseline RRF', fmt(r.rrf, 3)], ['Target LEV', pct(r.tlev), true], ['DevLev', pp(r.devlev), true]].map(([l, v, lock]: any) => (
+          {[[t('Company'), inputs.company], [t('Analysis year'), `${inputs.year} · FY${inputs.year - 1} data`], ['Baseline CTR', fmt(r.ctr, 2)], ['Baseline RRF', fmt(r.rrf, 3)], [t('Target LEV'), pct(r.tlev), true], ['DevLev', pp(r.devlev), true]].map(([l, v, lock]: any) => (
             <div key={l} className="px-5 py-4"><div className="flex items-center gap-1.5 text-[11.5px] text-mute">{l}{lock && <Lock size={11} />}</div><div className="tnum mt-1 truncate text-[15px] font-semibold">{v}</div></div>
           ))}
         </div>
-        <div className="flex items-center gap-2 border-t border-line bg-[#f3f8fc] px-5 py-2.5 text-[12.5px] font-medium text-navy"><Lock size={13} />Target leverage and DevLev remain fixed during CTR/RRF scenario simulations.</div>
+        <div className="flex items-center gap-2 border-t border-line bg-[#f3f8fc] px-5 py-2.5 text-[12.5px] font-medium text-navy"><Lock size={13} />{language === 'vi' ? 'Đòn bẩy mục tiêu và DevLev được giữ cố định trong mô phỏng CTR/RRF.' : 'Target leverage and DevLev remain fixed during CTR/RRF scenario simulations.'}</div>
       </Card>
 
       <div className="grid gap-5 lg:grid-cols-2">
-        <ScenarioSlider title="Carbon Intensity Scenario" sub="Emission reduction from baseline (negative values represent a stress increase)" min={SCENARIO_CONFIG.ctrReductionMin} max={SCENARIO_CONFIG.ctrReductionMax} step={SCENARIO_CONFIG.ctrReductionStep} value={ctrPct} onChange={setCtrPct} unit="%">
+        <ScenarioSlider title={t('Carbon Intensity Scenario')} sub={language === 'vi' ? 'Mức giảm phát thải so với cơ sở; giá trị âm thể hiện mức tăng do căng thẳng.' : 'Emission reduction from baseline (negative values represent a stress increase)'} min={SCENARIO_CONFIG.ctrReductionMin} max={SCENARIO_CONFIG.ctrReductionMax} step={SCENARIO_CONFIG.ctrReductionStep} value={ctrPct} onChange={setCtrPct} unit="%">
           <div><div className="text-[11.5px] text-mute">Scenario CTR</div><div className="tnum font-mono text-[20px] font-semibold">{fmt(calc.sCtr, 2)}</div></div>
           <div><div className="text-[11.5px] text-mute">Reduction · baseline {fmt(r.ctr, 2)}</div><div className="tnum font-mono text-[20px] font-semibold text-teal">{ctrPct > 0 ? '+' : ctrPct < 0 ? '−' : ''}{Math.abs(ctrPct)}%</div></div>
         </ScenarioSlider>
-        <ScenarioSlider title="Internal Reserve Scenario" sub="RRF, % of Total Assets" min={SCENARIO_CONFIG.rrfMinPct} max={SCENARIO_CONFIG.rrfMaxPct} step={SCENARIO_CONFIG.rrfStepPct} value={rrfS} onChange={setRrfS} unit="%">
+        <ScenarioSlider title={t('Internal Reserve Scenario')} sub={language === 'vi' ? 'RRF, % tổng tài sản' : 'RRF, % of Total Assets'} min={SCENARIO_CONFIG.rrfMinPct} max={SCENARIO_CONFIG.rrfMaxPct} step={SCENARIO_CONFIG.rrfStepPct} value={rrfS} onChange={setRrfS} unit="%">
           <div><div className="text-[11.5px] text-mute">RRF scenario</div><div className="tnum font-mono text-[20px] font-semibold">{fmt(calc.sRrf, 3)}</div></div>
           <div><div className="text-[11.5px] text-mute">Baseline {fmt(r.rrf, 3)}</div><div className="tnum font-mono text-[20px] font-semibold text-purple">{sgn((calc.sRrf - r.rrf) * 100, 1)} pp</div></div>
         </ScenarioSlider>
