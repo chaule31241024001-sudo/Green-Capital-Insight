@@ -1,0 +1,10 @@
+{
+  "description": "This platform empowers CFOs and finance teams to analyze climate risk and optimize capital structure using comprehensive financial and environmental data insights.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
